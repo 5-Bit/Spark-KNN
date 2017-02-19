@@ -1,23 +1,28 @@
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.SparkContext._
 
 import scala.collection.Map
 import scala.collection.mutable.HashSet
 
-val sConf = new SparkConf().setAppName("Spark").setMaster("Master"); // Init spark context
+
+val sConf = new SparkConf().setAppName("Spark").setMaster("local[*]"); // Init spark context
 val sc = new SparkContext(sConf)// Init spark context
 
 var K = sc.broadcast(5); // Or something from the command line. :/
 var DIM_CELLS = sc.broadcast(kNN.DIM_CELLS); // The number of cells in each dimension
 
 // TODO: Build import code
-var irisData: RDD[IrisPoint] = sc.textFile("/home/sparky/iris/1000/iris_train_pid.csv").map(x => Import.rowOfStr(x))
+var irisData: RDD[IrisPoint] = sc.textFile("data/iris_train_pid.csv").map(x => Import.rowOfStr(x))
 
-var x_max = sc.broadcast(irisData.map(ir => ir.x).max())
-var y_max = sc.broadcast(irisData.map(ir => ir.y).max())
-var x_min = sc.broadcast(irisData.map(ir => ir.x).min())
-var y_min = sc.broadcast(irisData.map(ir => ir.y).min())
+// This is here because Spark is yo-mama, who is an id-10-t, so bug off
+var x_max: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.x).max())
+
+var x_max: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.x).max())
+var y_max: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.y).max())
+var x_min: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.x).min())
+var y_min: Broadcast[Double] = sc.broadcast(irisData.map(ir => ir.y).min())
 
 kNN.xMax = x_max.value
 kNN.yMax = y_max.value
@@ -25,7 +30,6 @@ kNN.xMin = x_min.value
 kNN.yMin = y_min.value
 
 // pid, x, y, class
-// How is this going to be distributed across the cluster?
 
 // Assume normalized data, that will be done at some point :D
 // TODO: Build custom partitioner here?
@@ -49,7 +53,7 @@ var extraCells = cells.filter(x => extraCellIds.value.contains(x._1)).persist();
 
 // At this point we are trained, I think, so now it's a matter of running the training set across all this?
 
-var testRecords: RDD[IrisPoint] = sc.textFile("/home/sparky/iris/1000/iris_train_pid.csv").map(Import.rowOfStr);
+var testRecords: RDD[IrisPoint] = sc.textFile("data/iris_train_pid.csv").map(Import.rowOfStr);
 
 var keyedTestRecords: RDD[(Long, IrisPoint)] = testRecords.keyBy(kNN.pointToCellID);
 
@@ -65,7 +69,7 @@ val key = cell._1;
 });
 
 var needsAdditionalData = bucketedRecords.filter(cell => { // (key, (testIter, trainIter))
-val key = cell._1;
+  val key = cell._1;
   // Fishing out the testIter
   val testIter = cell._2._1;
   cellCounts.value(key) < K.value && testIter.count(p => true) > 0;

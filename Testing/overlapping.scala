@@ -1,6 +1,7 @@
 import org.apache.spark.broadcast.Broadcast
 
 import scala.collection.Map
+import scala.collection.mutable.ArrayBuffer
 
 object overlapping {
 
@@ -27,12 +28,13 @@ object overlapping {
     }
   }
 
-  private def overlapAnalysis(radius: Double, center: (Double, Double)): (Long, Array[Long]) = {
+  private def overlapAnalysis(radius: Double, center: (Double, Double)): (Long, ArrayBuffer[Long]) = {
     val x = center._1
     val y = center._2
     val c = new Circle(x,y,radius)
     // ...
-    var totalNumberOfPotentialKNNs = 0;
+    var totalNumberOfPotentialKNNs: Long = 0
+    var overlappedCellIds: ArrayBuffer[Long] = ArrayBuffer[Long]()
 
     for (innerXmul <- 1 to kNN.DIM_CELLS) {
       for (innerYmul <- 1 to kNN.DIM_CELLS) {
@@ -57,29 +59,20 @@ object overlapping {
         val lineRight = new LineSegment(ox, cy, ox, oy)
         val lineBottom = new LineSegment(cx, oy, ox, oy)
         val lineLeft = new LineSegment(cx, cy, cx, oy)
-        val cellId = kNN.xyToCellId((cx + kNN.cell_width/2), cy+(kNN.cell_height/2))
+        val cellId: Long = kNN.xyToCellId((cx + kNN.cell_width/2), cy+(kNN.cell_height/2))
 
         if (doesLineSegmentOverlapCircle(c, lineTop) ||
           doesLineSegmentOverlapCircle(c, lineRight) ||
           doesLineSegmentOverlapCircle(c, lineBottom) ||
           doesLineSegmentOverlapCircle(c, lineLeft)) {
           totalNumberOfPotentialKNNs += cellCounts.value(cellId)
+          overlappedCellIds.append(cellId)
+
         }
       }
     }
 
-    // For each cell in the grid
-    //   find its corner point
-    //   Find the other 3 points
-    //   generate 4 lines
-    //   Check to see if any of the lines
-    //   of the square overlap or not.
-    //   If they do, add the points associated with the cellid to the total above
-    totalNumberOfPotentialKNNs
+    (totalNumberOfPotentialKNNs, overlappedCellIds)
   }
 
-  def cellIds (radius: Double, center: (Double, Double)): Array[Long] = {
-    // ...
-
-  }
 }

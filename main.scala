@@ -233,7 +233,7 @@ var knnOfUndersuppliedCells: RDD[(IrisPoint, Array[IrisPoint])] =
       kNN.knn(K, test, train);
   });
 
-:quit
+// :quit
 
 // Points in empty cells
 // Points in under-k cells
