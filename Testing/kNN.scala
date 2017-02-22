@@ -1,3 +1,4 @@
+package knn;
 import org.apache.spark.{SparkConf, SparkContext}
 
 //val sConf = new SparkConf().setAppName("Spark").setMaster("Master"); // Init spark context
@@ -19,8 +20,8 @@ object kNN {
   var xMin = 0.0
   var yMin = 0.0
 
-  val cell_width = (xMax - xMin) / (DIM_CELLS.toDouble)
-  val cell_height = (yMax - yMin) / (DIM_CELLS.toDouble)
+  def cell_width(): Double = { (xMax - xMin) / (DIM_CELLS.toDouble) }
+  val cell_height(): Double = { (yMax - yMin) / (DIM_CELLS.toDouble) }
 
   def distance(point1: IrisPoint, point2: IrisPoint): Double = {
     return math.sqrt(math.pow(math.abs(point1.x - point2.x), 2) + math.pow(math.abs(point1.y - point2.y), 2));

@@ -1,4 +1,6 @@
+package knn;
 import org.apache.spark.broadcast.Broadcast
+
 
 import scala.collection.Map
 import scala.collection.mutable.ArrayBuffer
@@ -7,7 +9,7 @@ object overlapping {
 
   var cellCounts: Broadcast[Map[Long, Long]] = null
 
-  private def doesLineSegmentOverlapCircle(c: Circle, l: LineSegment): Boolean = {
+  def doesLineSegmentOverlapCircle(c: Circle, l: LineSegment): Boolean = {
     val dx = l.x2 - l.x1
     val dy = l.y2 - l.y1
 

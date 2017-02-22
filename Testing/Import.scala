@@ -1,3 +1,4 @@
+package knn;
 object Import {
   def rowOfStr(row:String): IrisPoint = {
     val rowArr: Array[String] = row.split(",");
