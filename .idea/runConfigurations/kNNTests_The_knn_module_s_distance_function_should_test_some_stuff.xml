@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="kNNTests.The knn module's distance function should test some stuff" type="ScalaTestRunConfiguration" factoryName="ScalaTest" singleton="true">
+    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+    <module name="Spark-KNN" />
+    <setting name="path" value="knnTesting.kNNTests" />
+    <setting name="package" value="" />
+    <setting name="vmparams" value="" />
+    <setting name="params" value="" />
+    <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <setting name="searchForTest" value="In whole project" />
+    <setting name="testName" value="The knn module's distance function should test some stuff" />
+    <setting name="testKind" value="All in package" />
+    <setting name="showProgressMessages" value="true" />
+    <envs />
+    <method />
+  </configuration>
+</component>
