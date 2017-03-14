@@ -9,25 +9,49 @@ object overlapping {
 
   var cellCounts: Broadcast[Map[Long, Long]] = null
 
-  def doesLineSegmentOverlapCircle(c: Circle, l: LineSegment): Boolean = {
-    val dx = l.x2 - l.x1
-    val dy = l.y2 - l.y1
+  // Scala port of: http://doswa.com/2009/07/13/circle-segment-intersectioncollision.html
+  def closestPointOnSeg(seg_a: Vector2D, seg_b: Vector2D, circle_pos: Vector2D ): Vector2D = {
+    val seg_v = seg_b - seg_a
+    val pt_v = circle_pos - seg_a
 
-    val A = dx * dx - dy * dy
-    val B = 2 * (dx * (l.x1 - c.x) + dy * (l.y1 -c.y ))
-    val C = (l.x1 - c.x) * (l.x1 - c.x) + (l.y1 - c.y) * (l.y1 - c.y) - (c.r * c.r)
-
-    val discriminant = B * B - 4 * A * C
-
-    if (discriminant < 0) {
-      return false
+    if (seg_v.len()) {
+      new Vector(0,0)
     } else {
-      val sqrt_disc = math.sqrt(discriminant)
-      val t1 = (-B + sqrt_disc) / (2 * A)
-      val t2 = (-B - sqrt_disc) / (2 * A)
-
-      return !((0 <= t1 && t1 <= 1) || (0 <= t2 && t2 <=1))
+      val proj = pt_v * seg_v.unit()
+      if (proj <= 0) {
+        seg_a
+      } else if (proj >= seg_v.len()) {
+        seg_b
+      } else {
+        val proj_v = seg_v.unit().scalar_mul(proj)
+        proj_v + seg_a
+      }
     }
+  }
+
+  // Also part of the port from:
+  // http://doswa.com/2009/07/13/circle-segment-intersectioncollision.html
+  def segmentCircleDist(seg_a: Vector2D, seg_b: Vector2D, circ_pos: Vector2D, circ_rad: Double): Double ={
+    val dist_v = circ_pos - closestPointOnSeg(seg_a, seg_b, circ_pos)
+    if (dist_v.len() > circ_rad) {
+      0.0
+    }
+    else if (dist_v.len() <= 0){
+      -1.0
+    } else {
+      dist_v.unit().scalar_mul(circ_rad - dist_v.len()).len()
+    }
+  }
+
+  // Perform the unholy regex/html parsing
+  // ZALGO COMES
+  def doesLineSegmentOverlapCircle(c: Circle, l: LineSegment): Boolean ={
+    //segmentCircleDist(c.)
+    val seg_a = new Vector2D(l.x1, l.y1)
+    val seg_b = new Vector2D(l.x2, l.y2)
+    val circ_pos = new Vector2D(c.x, c.y)
+
+    segmentCircleDist(seg_a, seg_b, circ_pos, c.r) > 0
   }
 
   private def overlapAnalysis(radius: Double, center: (Double, Double)): (Long, ArrayBuffer[Long]) = {

@@ -2,7 +2,7 @@ package knnTesting
 
 import org.scalatest._
 
-object kNNTests extends FlatSpec with Matchers {
+class kNNTests extends FlatSpec with Matchers {
 
   "The knn module's distance function" should "test some stuff" in {
     knn.kNN.xMax = 3.0
